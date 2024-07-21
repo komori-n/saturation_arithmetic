@@ -18,7 +18,3 @@ repos:
   rev: v17.0.4
   hooks:
   - id: clang-format
-- repo: https://github.com/pocc/pre-commit-hooks
-  rev: v1.3.5
-  hooks:
-  - id: cpplint
