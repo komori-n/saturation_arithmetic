@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(komori_saturation_arithmetic INTERFACE)
 target_include_directories(komori_saturation_arithmetic INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_options(komori_saturation_arithmetic INTERFACE -Wall -Wextra)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -29,6 +28,9 @@ target_link_libraries(
   GTest::gtest_main
 )
 target_compile_options(test_komori_saturation_arithmetic PRIVATE -Wno-narrowing)
+if(!MSVC)
+  target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Wno-narrowing)
+endif()
 
 include(GoogleTest)
 gtest_discover_tests(test_komori_saturation_arithmetic)
