@@ -1,4 +1,4 @@
-"""An header-only C++ library dedicated to Saturation Arithmetic"""
+"""A header-only library dedicated to Saturation Arithmetic in C++14."""
 module(name = "komori_saturation_arithmetic")
 
 bazel_dep(name = "googletest", version = "1.15.0")
