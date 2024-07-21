@@ -27,10 +27,8 @@ target_link_libraries(
   komori_saturation_arithmetic
   GTest::gtest_main
 )
-if(MSVC)
-  target_compile_options(test_komori_saturation_arithmetic PRIVATE /w)
-else()
-  target_compile_options(test_komori_saturation_arithmetic PRIVATE -Wall -Wextra -Wno-narrowing)
+if(NOT MSVC)
+  target_compile_options(test_komori_saturation_arithmetic PRIVATE -Wall -Wextra)
 endif()
 
 include(GoogleTest)

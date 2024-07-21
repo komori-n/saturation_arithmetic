@@ -147,7 +147,7 @@ constexpr T mul_sat(T x, T y) noexcept {
 template <typename T, std::enable_if_t<std::is_integral<T>::value, std::nullptr_t> = nullptr>
 constexpr T div_sat(T x, T y) noexcept {
   if KOMORI_CONSTEXPR_IF_CPP17 (std::is_signed<T>::value) {
-    if (x == std::numeric_limits<T>::min() && y == T{-1}) {
+    if (x == std::numeric_limits<T>::min() && y == static_cast<T>(-1)) {
       return std::numeric_limits<T>::max();
     }
   }

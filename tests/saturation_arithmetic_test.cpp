@@ -54,22 +54,22 @@ TYPED_TEST(AddSatTest, Test) {
   constexpr TypeParam min = std::numeric_limits<TypeParam>::min();
   constexpr TypeParam max = std::numeric_limits<TypeParam>::max();
 
-  EXPECT_EQ(TypeParam{33 + 4}, add_sat(TypeParam{33}, TypeParam{4}));
-  EXPECT_EQ(TypeParam{33 + 4}, add_sat_wo_builtin(TypeParam{33}, TypeParam{4}));
-  EXPECT_EQ(max, add_sat(max, TypeParam{1}));
-  EXPECT_EQ(max, add_sat_wo_builtin(max, TypeParam{1}));
+  EXPECT_EQ(TypeParam{33 + 4}, add_sat(static_cast<TypeParam>(33), static_cast<TypeParam>(4)));
+  EXPECT_EQ(TypeParam{33 + 4}, add_sat_wo_builtin(static_cast<TypeParam>(33), static_cast<TypeParam>(4)));
+  EXPECT_EQ(max, add_sat(max, static_cast<TypeParam>(1)));
+  EXPECT_EQ(max, add_sat_wo_builtin(max, static_cast<TypeParam>(1)));
 
   if (std::is_signed<TypeParam>::value) {
-    EXPECT_EQ(TypeParam{33 + -4}, add_sat(TypeParam{33}, TypeParam{-4}));
-    EXPECT_EQ(TypeParam{33 + -4}, add_sat_wo_builtin(TypeParam{33}, TypeParam{-4}));
-    EXPECT_EQ(min, add_sat(min, TypeParam{-1}));
-    EXPECT_EQ(min, add_sat_wo_builtin(min, TypeParam{-1}));
-    EXPECT_EQ(min + 1, add_sat(min, TypeParam{1}));
-    EXPECT_EQ(min + 1, add_sat_wo_builtin(min, TypeParam{1}));
-    EXPECT_EQ(max, add_sat(max, TypeParam{1}));
-    EXPECT_EQ(max, add_sat_wo_builtin(max, TypeParam{1}));
-    EXPECT_EQ(max - 1, add_sat(max, TypeParam{-1}));
-    EXPECT_EQ(max - 1, add_sat_wo_builtin(max, TypeParam{-1}));
+    EXPECT_EQ(TypeParam{33 + -4}, add_sat(static_cast<TypeParam>(33), static_cast<TypeParam>(-4)));
+    EXPECT_EQ(TypeParam{33 + -4}, add_sat_wo_builtin(static_cast<TypeParam>(33), static_cast<TypeParam>(-4)));
+    EXPECT_EQ(min, add_sat(min, static_cast<TypeParam>(-1)));
+    EXPECT_EQ(min, add_sat_wo_builtin(min, static_cast<TypeParam>(-1)));
+    EXPECT_EQ(min + 1, add_sat(min, static_cast<TypeParam>(1)));
+    EXPECT_EQ(min + 1, add_sat_wo_builtin(min, static_cast<TypeParam>(1)));
+    EXPECT_EQ(max, add_sat(max, static_cast<TypeParam>(1)));
+    EXPECT_EQ(max, add_sat_wo_builtin(max, static_cast<TypeParam>(1)));
+    EXPECT_EQ(max - 1, add_sat(max, static_cast<TypeParam>(-1)));
+    EXPECT_EQ(max - 1, add_sat_wo_builtin(max, static_cast<TypeParam>(-1)));
   }
 }
 
@@ -78,22 +78,22 @@ TYPED_TEST(SubSatTest, Test) {
   constexpr TypeParam min = std::numeric_limits<TypeParam>::min();
   constexpr TypeParam max = std::numeric_limits<TypeParam>::max();
 
-  EXPECT_EQ(TypeParam{33 - 4}, sub_sat(TypeParam{33}, TypeParam{4}));
-  EXPECT_EQ(TypeParam{33 - 4}, sub_sat_wo_builtin(TypeParam{33}, TypeParam{4}));
-  EXPECT_EQ(min, sub_sat(min, TypeParam{1}));
-  EXPECT_EQ(min, sub_sat_wo_builtin(min, TypeParam{1}));
+  EXPECT_EQ(TypeParam{33 - 4}, sub_sat(static_cast<TypeParam>(33), static_cast<TypeParam>(4)));
+  EXPECT_EQ(TypeParam{33 - 4}, sub_sat_wo_builtin(static_cast<TypeParam>(33), static_cast<TypeParam>(4)));
+  EXPECT_EQ(min, sub_sat(min, static_cast<TypeParam>(1)));
+  EXPECT_EQ(min, sub_sat_wo_builtin(min, static_cast<TypeParam>(1)));
 
   if (std::is_signed<TypeParam>::value) {
-    EXPECT_EQ(TypeParam{33 - -4}, sub_sat(TypeParam{33}, TypeParam{-4}));
-    EXPECT_EQ(TypeParam{33 - -4}, sub_sat_wo_builtin(TypeParam{33}, TypeParam{-4}));
-    EXPECT_EQ(min, sub_sat(min, TypeParam{1}));
-    EXPECT_EQ(min, sub_sat_wo_builtin(min, TypeParam{1}));
-    EXPECT_EQ(min + 1, sub_sat(min, TypeParam{-1}));
-    EXPECT_EQ(min + 1, sub_sat_wo_builtin(min, TypeParam{-1}));
-    EXPECT_EQ(max, sub_sat(max, TypeParam{-1}));
-    EXPECT_EQ(max, sub_sat_wo_builtin(max, TypeParam{-1}));
-    EXPECT_EQ(max - 1, sub_sat(max, TypeParam{1}));
-    EXPECT_EQ(max - 1, sub_sat_wo_builtin(max, TypeParam{1}));
+    EXPECT_EQ(TypeParam{33 - -4}, sub_sat(static_cast<TypeParam>(33), static_cast<TypeParam>(-4)));
+    EXPECT_EQ(TypeParam{33 - -4}, sub_sat_wo_builtin(static_cast<TypeParam>(33), static_cast<TypeParam>(-4)));
+    EXPECT_EQ(min, sub_sat(min, static_cast<TypeParam>(1)));
+    EXPECT_EQ(min, sub_sat_wo_builtin(min, static_cast<TypeParam>(1)));
+    EXPECT_EQ(min + 1, sub_sat(min, static_cast<TypeParam>(-1)));
+    EXPECT_EQ(min + 1, sub_sat_wo_builtin(min, static_cast<TypeParam>(-1)));
+    EXPECT_EQ(max, sub_sat(max, static_cast<TypeParam>(-1)));
+    EXPECT_EQ(max, sub_sat_wo_builtin(max, static_cast<TypeParam>(-1)));
+    EXPECT_EQ(max - 1, sub_sat(max, static_cast<TypeParam>(1)));
+    EXPECT_EQ(max - 1, sub_sat_wo_builtin(max, static_cast<TypeParam>(1)));
   }
 }
 
@@ -102,20 +102,20 @@ TYPED_TEST(MulSatTest, Test) {
   constexpr TypeParam min = std::numeric_limits<TypeParam>::min();
   constexpr TypeParam max = std::numeric_limits<TypeParam>::max();
 
-  EXPECT_EQ(TypeParam{3 * 4}, mul_sat(TypeParam{3}, TypeParam{4}));
-  EXPECT_EQ(TypeParam{3 * 4}, mul_sat_wo_builtin(TypeParam{3}, TypeParam{4}));
-  EXPECT_EQ(max, mul_sat(TypeParam{max - 33}, TypeParam{4}));
-  EXPECT_EQ(max, mul_sat_wo_builtin(TypeParam{max - 33}, TypeParam{4}));
+  EXPECT_EQ(TypeParam{3 * 4}, mul_sat(static_cast<TypeParam>(3), static_cast<TypeParam>(4)));
+  EXPECT_EQ(TypeParam{3 * 4}, mul_sat_wo_builtin(static_cast<TypeParam>(3), static_cast<TypeParam>(4)));
+  EXPECT_EQ(max, mul_sat(TypeParam{max - 33}, static_cast<TypeParam>(4)));
+  EXPECT_EQ(max, mul_sat_wo_builtin(TypeParam{max - 33}, static_cast<TypeParam>(4)));
 
   if (std::is_signed<TypeParam>::value) {
-    EXPECT_EQ(min, mul_sat(TypeParam{min + 33}, TypeParam{4}));
-    EXPECT_EQ(min, mul_sat_wo_builtin(TypeParam{min + 33}, TypeParam{4}));
-    EXPECT_EQ(max, mul_sat(TypeParam{min + 33}, TypeParam{-4}));
-    EXPECT_EQ(max, mul_sat_wo_builtin(TypeParam{min + 33}, TypeParam{-4}));
-    EXPECT_EQ(min, mul_sat(TypeParam{max - 33}, TypeParam{-4}));
-    EXPECT_EQ(min, mul_sat_wo_builtin(TypeParam{max - 33}, TypeParam{-4}));
-    EXPECT_EQ(max, mul_sat(TypeParam{max - 33}, TypeParam{4}));
-    EXPECT_EQ(max, mul_sat_wo_builtin(TypeParam{max - 33}, TypeParam{4}));
+    EXPECT_EQ(min, mul_sat(TypeParam{min + 33}, static_cast<TypeParam>(4)));
+    EXPECT_EQ(min, mul_sat_wo_builtin(TypeParam{min + 33}, static_cast<TypeParam>(4)));
+    EXPECT_EQ(max, mul_sat(TypeParam{min + 33}, static_cast<TypeParam>(-4)));
+    EXPECT_EQ(max, mul_sat_wo_builtin(TypeParam{min + 33}, static_cast<TypeParam>(-4)));
+    EXPECT_EQ(min, mul_sat(TypeParam{max - 33}, static_cast<TypeParam>(-4)));
+    EXPECT_EQ(min, mul_sat_wo_builtin(TypeParam{max - 33}, static_cast<TypeParam>(-4)));
+    EXPECT_EQ(max, mul_sat(TypeParam{max - 33}, static_cast<TypeParam>(4)));
+    EXPECT_EQ(max, mul_sat_wo_builtin(TypeParam{max - 33}, static_cast<TypeParam>(4)));
   }
 }
 
@@ -124,14 +124,14 @@ TYPED_TEST(DivSatTest, Test) {
   constexpr TypeParam min = std::numeric_limits<TypeParam>::min();
   constexpr TypeParam max = std::numeric_limits<TypeParam>::max();
 
-  EXPECT_EQ(TypeParam{33 / 4}, div_sat(TypeParam{33}, TypeParam{4}));
-  EXPECT_EQ(min, div_sat(min, TypeParam{1}));
-  EXPECT_EQ(max, div_sat(max, TypeParam{1}));
+  EXPECT_EQ(TypeParam{33 / 4}, div_sat(static_cast<TypeParam>(33), static_cast<TypeParam>(4)));
+  EXPECT_EQ(min, div_sat(min, static_cast<TypeParam>(1)));
+  EXPECT_EQ(max, div_sat(max, static_cast<TypeParam>(1)));
 
   if (std::is_signed<TypeParam>::value) {
-    EXPECT_EQ(TypeParam{33 / -4}, div_sat(TypeParam{33}, TypeParam{-4}));
-    EXPECT_EQ(max, div_sat(min, TypeParam{-1}));
-    EXPECT_EQ(TypeParam{-max}, div_sat(max, TypeParam{-1}));
+    EXPECT_EQ(TypeParam{33 / -4}, div_sat(static_cast<TypeParam>(33), static_cast<TypeParam>(-4)));
+    EXPECT_EQ(max, div_sat(min, static_cast<TypeParam>(-1)));
+    EXPECT_EQ(TypeParam{-max}, div_sat(max, static_cast<TypeParam>(-1)));
   }
 }
 
