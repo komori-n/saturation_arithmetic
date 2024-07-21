@@ -80,7 +80,7 @@ constexpr T mul_sat_wo_builtin(T x, T y) noexcept {
  * @param y The second operand.
  * @return The sum of the two operands with saturation.
  */
-template <typename T>
+template <typename T, std::enable_if_t<std::is_integral<T>::value, std::nullptr_t> = nullptr>
 constexpr T add_sat(T x, T y) noexcept {
   // Use the built-in function if available.
 #if KOMORI_HAS_BUILTIN(__builtin_add_overflow)
@@ -101,7 +101,7 @@ constexpr T add_sat(T x, T y) noexcept {
  * @param y The subtrahend.
  * @return The difference of the two operands with saturation.
  */
-template <typename T>
+template <typename T, std::enable_if_t<std::is_integral<T>::value, std::nullptr_t> = nullptr>
 constexpr T sub_sat(T x, T y) noexcept {
   // Use the built-in function if available.
 #if KOMORI_HAS_BUILTIN(__builtin_sub_overflow)
@@ -122,7 +122,7 @@ constexpr T sub_sat(T x, T y) noexcept {
  * @param y The second operand.
  * @return The product of the two operands with saturation.
  */
-template <typename T>
+template <typename T, std::enable_if_t<std::is_integral<T>::value, std::nullptr_t> = nullptr>
 constexpr T mul_sat(T x, T y) noexcept {
   // Use the built-in function if available.
 #if KOMORI_HAS_BUILTIN(__builtin_mul_overflow)
@@ -157,12 +157,14 @@ constexpr T div_sat(T x, T y) noexcept {
 
 /**
  * @brief Casts a value to another type with saturation.
- * @tparam R The destination type.
+ * @tparam R The destination type. (integral type)
  * @tparam T An integer type.
  * @param x The value to cast.
  * @return The value casted to the destination type with saturation.
  */
-template <typename R, typename T>
+template <typename R,
+          typename T,
+          std::enable_if_t<std::is_integral<R>::value && std::is_integral<T>::value, std::nullptr_t> = nullptr>
 constexpr R saturate_cast(T x) noexcept {
   using UT = std::make_unsigned_t<T>;
   using UR = std::make_unsigned_t<R>;
