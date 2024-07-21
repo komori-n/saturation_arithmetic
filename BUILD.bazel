@@ -11,5 +11,6 @@ cc_test(
     deps = [
         ":komori_saturation_arithmetic",
         "@googletest//:gtest_main",
-    ]
+    ],
+    copts = ["-Wno-narrowing"],
 )

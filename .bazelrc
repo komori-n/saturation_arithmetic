@@ -1,4 +1,3 @@
 build --cxxopt='--std=c++14'
 build --copt='-Wall'
 build --copt='-Wextra'
-build --copt='-Wno-narrowing'
