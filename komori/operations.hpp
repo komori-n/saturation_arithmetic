@@ -155,8 +155,30 @@ constexpr T div_sat(T x, T y) noexcept {
   return x / y;
 }
 
+/**
+ * @brief Casts a value to another type with saturation.
+ * @tparam R The destination type.
+ * @tparam T An integer type.
+ * @param x The value to cast.
+ * @return The value casted to the destination type with saturation.
+ */
 template <typename R, typename T>
-constexpr R saturate_cast(T x) noexcept;
+constexpr R saturate_cast(T x) noexcept {
+  using UT = std::make_unsigned_t<T>;
+  using UR = std::make_unsigned_t<R>;
+
+  if (x < 0) {
+    if KOMORI_CONSTEXPR_IF_CPP17 (std::is_unsigned<R>::value) {
+      return 0;
+    } else if (std::numeric_limits<R>::min() > x) {  // both R and T are signed
+      return std::numeric_limits<R>::min();
+    }
+  } else if (static_cast<UR>(std::numeric_limits<R>::max()) < static_cast<UT>(x)) {
+    return std::numeric_limits<R>::max();
+  }
+
+  return static_cast<R>(x);
+}
 }  // namespace komori
 
 #undef KOMORI_HAS_BUILTIN

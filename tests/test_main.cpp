@@ -7,6 +7,7 @@
 using komori::add_sat;
 using komori::div_sat;
 using komori::mul_sat;
+using komori::saturate_cast;
 using komori::sub_sat;
 using komori::detail::add_sat_wo_builtin;
 using komori::detail::mul_sat_wo_builtin;
@@ -22,6 +23,11 @@ T clamp(T x, T min, T max) {
     return max;
   }
   return x;
+}
+
+template <typename T, typename S>
+S type_clamp(S x) {
+  return clamp<S>(x, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
 }
 
 using integers = testing::Types<std::int8_t,
@@ -161,5 +167,33 @@ TEST(S8Test, Int8All) {
       const std::int32_t actual_div = div_sat(static_cast<std::int8_t>(x), static_cast<std::int8_t>(y));
       ASSERT_EQ(expected_div, actual_div) << "x: " << x << ", y: " << y;
     }
+  }
+}
+
+TEST(SaturateCast, Uint16All) {
+  const std::int64_t u16max = std::numeric_limits<std::uint16_t>::max();
+
+  for (std::int64_t x = 0; x <= u16max; ++x) {
+    std::uint16_t value = static_cast<std::uint16_t>(x);
+    ASSERT_EQ(type_clamp<std::uint32_t>(x), saturate_cast<std::uint32_t>(value)) << "x: " << x;
+    ASSERT_EQ(type_clamp<std::int32_t>(x), saturate_cast<std::int32_t>(value)) << "x: " << x;
+    ASSERT_EQ(type_clamp<std::uint16_t>(x), saturate_cast<std::uint16_t>(value)) << "x: " << x;
+    ASSERT_EQ(type_clamp<std::int16_t>(x), saturate_cast<std::int16_t>(value)) << "x: " << x;
+    ASSERT_EQ(type_clamp<std::uint8_t>(x), saturate_cast<std::uint8_t>(value)) << "x: " << x;
+    ASSERT_EQ(type_clamp<std::int8_t>(x), saturate_cast<std::int8_t>(value)) << "x: " << x;
+  }
+}
+
+TEST(SaturateCast, Int16All) {
+  const std::int64_t s16min = std::numeric_limits<std::int16_t>::min();
+  const std::int64_t s16max = std::numeric_limits<std::int16_t>::max();
+  for (std::int64_t x = s16min; x <= s16max; ++x) {
+    std::int16_t value = static_cast<std::int16_t>(x);
+    ASSERT_EQ(type_clamp<std::uint32_t>(x), saturate_cast<std::uint32_t>(value)) << "x: " << x;
+    ASSERT_EQ(type_clamp<std::int32_t>(x), saturate_cast<std::int32_t>(value)) << "x: " << x;
+    ASSERT_EQ(type_clamp<std::uint16_t>(x), saturate_cast<std::uint16_t>(value)) << "x: " << x;
+    ASSERT_EQ(type_clamp<std::int16_t>(x), saturate_cast<std::int16_t>(value)) << "x: " << x;
+    ASSERT_EQ(type_clamp<std::uint8_t>(x), saturate_cast<std::uint8_t>(value)) << "x: " << x;
+    ASSERT_EQ(type_clamp<std::int8_t>(x), saturate_cast<std::int8_t>(value)) << "x: " << x;
   }
 }
