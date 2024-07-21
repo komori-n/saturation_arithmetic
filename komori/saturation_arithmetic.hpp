@@ -166,13 +166,15 @@ template <typename R,
           typename T,
           std::enable_if_t<std::is_integral<R>::value && std::is_integral<T>::value, std::nullptr_t> = nullptr>
 constexpr R saturate_cast(T x) noexcept {
+  using ST = std::make_signed_t<T>;
+  using SR = std::make_signed_t<R>;
   using UT = std::make_unsigned_t<T>;
   using UR = std::make_unsigned_t<R>;
 
   if (x < 0) {
     if KOMORI_CONSTEXPR_IF_CPP17 (std::is_unsigned<R>::value) {
       return 0;
-    } else if (std::numeric_limits<R>::min() > x) {  // both R and T are signed
+    } else if (static_cast<SR>(std::numeric_limits<R>::min()) > static_cast<ST>(x)) {
       return std::numeric_limits<R>::min();
     }
   } else if (static_cast<UR>(std::numeric_limits<R>::max()) < static_cast<UT>(x)) {
