@@ -31,6 +31,20 @@ constexpr T add_sat_wo_builtin(T x, T y) noexcept {
     return x + y;
   }
 }
+
+template <typename T>
+constexpr T sub_sat_wo_builtin(T x, T y) noexcept {
+  constexpr T kMax = std::numeric_limits<T>::max();
+  constexpr T kMin = std::numeric_limits<T>::min();
+
+  if (y > 0 && x < kMin + y) {
+    return kMin;
+  } else if (y < 0 && x > kMax + y) {
+    return kMax;
+  } else {
+    return x - y;
+  }
+}
 }  // namespace detail
 
 /**
@@ -54,8 +68,27 @@ constexpr T add_sat(T x, T y) noexcept {
 #endif
 }
 
+/**
+ * @brief Subtracts two integers with saturation.
+ * @tparam T An integer type.
+ * @param x The minuend.
+ * @param y The subtrahend.
+ * @return The difference of the two operands with saturation.
+ */
 template <typename T>
-constexpr T sub_sat(T x, T y) noexcept;
+constexpr T sub_sat(T x, T y) noexcept {
+  // Use the built-in function if available.
+#if KOMORI_HAS_BUILTIN(__builtin_sub_overflow)
+  T result{};
+  if (__builtin_sub_overflow(x, y, &result)) {
+    return y >= 0 ? std::numeric_limits<T>::min() : std::numeric_limits<T>::max();
+  }
+  return result;
+#else
+  return detail::sub_sat_wo_builtin(x, y);
+#endif
+}
+
 template <typename T>
 constexpr T mul_sat(T x, T y) noexcept;
 
