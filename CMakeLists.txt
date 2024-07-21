@@ -27,9 +27,8 @@ target_link_libraries(
   komori_saturation_arithmetic
   GTest::gtest_main
 )
-target_compile_options(test_komori_saturation_arithmetic PRIVATE -Wno-narrowing)
 if(!MSVC)
-  target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Wno-narrowing)
+  target_compile_options(test_komori_saturation_arithmetic -Wall -Wextra -Wno-narrowing)
 endif()
 
 include(GoogleTest)
