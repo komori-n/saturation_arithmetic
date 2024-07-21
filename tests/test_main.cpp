@@ -6,8 +6,10 @@
 
 using komori::add_sat;
 using komori::div_sat;
+using komori::mul_sat;
 using komori::sub_sat;
 using komori::detail::add_sat_wo_builtin;
+using komori::detail::mul_sat_wo_builtin;
 using komori::detail::sub_sat_wo_builtin;
 
 namespace {
@@ -35,6 +37,8 @@ template <typename T>
 class AddSatTest : public testing::Test {};
 template <typename T>
 class SubSatTest : public testing::Test {};
+template <typename T>
+class MulSatTest : public testing::Test {};
 template <typename T>
 class DivSatTest : public testing::Test {};
 }  // namespace
@@ -87,6 +91,28 @@ TYPED_TEST(SubSatTest, Test) {
   }
 }
 
+TYPED_TEST_SUITE(MulSatTest, integers);
+TYPED_TEST(MulSatTest, Test) {
+  constexpr TypeParam min = std::numeric_limits<TypeParam>::min();
+  constexpr TypeParam max = std::numeric_limits<TypeParam>::max();
+
+  EXPECT_EQ(TypeParam{3 * 4}, mul_sat(TypeParam{3}, TypeParam{4}));
+  EXPECT_EQ(TypeParam{3 * 4}, mul_sat_wo_builtin(TypeParam{3}, TypeParam{4}));
+  EXPECT_EQ(max, mul_sat(TypeParam{max - 33}, TypeParam{4}));
+  EXPECT_EQ(max, mul_sat_wo_builtin(TypeParam{max - 33}, TypeParam{4}));
+
+  if (std::is_signed<TypeParam>::value) {
+    EXPECT_EQ(min, mul_sat(TypeParam{min + 33}, TypeParam{4}));
+    EXPECT_EQ(min, mul_sat_wo_builtin(TypeParam{min + 33}, TypeParam{4}));
+    EXPECT_EQ(max, mul_sat(TypeParam{min + 33}, TypeParam{-4}));
+    EXPECT_EQ(max, mul_sat_wo_builtin(TypeParam{min + 33}, TypeParam{-4}));
+    EXPECT_EQ(min, mul_sat(TypeParam{max - 33}, TypeParam{-4}));
+    EXPECT_EQ(min, mul_sat_wo_builtin(TypeParam{max - 33}, TypeParam{-4}));
+    EXPECT_EQ(max, mul_sat(TypeParam{max - 33}, TypeParam{4}));
+    EXPECT_EQ(max, mul_sat_wo_builtin(TypeParam{max - 33}, TypeParam{4}));
+  }
+}
+
 TYPED_TEST_SUITE(DivSatTest, integers);
 TYPED_TEST(DivSatTest, Test) {
   constexpr TypeParam min = std::numeric_limits<TypeParam>::min();
@@ -124,6 +150,12 @@ TEST(S8Test, Int8All) {
       const std::int32_t actual_sub2 = sub_sat_wo_builtin(static_cast<std::int8_t>(x), static_cast<std::int8_t>(y));
       ASSERT_EQ(expected_sub, actual_sub1) << "x: " << x << ", y: " << y;
       ASSERT_EQ(expected_sub, actual_sub2) << "x: " << x << ", y: " << y;
+
+      const std::int32_t expected_mul = clamp(x * y, s8min, s8max);
+      const std::int32_t actual_mul1 = mul_sat(static_cast<std::int8_t>(x), static_cast<std::int8_t>(y));
+      const std::int32_t actual_mul2 = mul_sat_wo_builtin(static_cast<std::int8_t>(x), static_cast<std::int8_t>(y));
+      ASSERT_EQ(expected_mul, actual_mul1) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(expected_mul, actual_mul2) << "x: " << x << ", y: " << y;
 
       const std::int32_t expected_div = clamp(x / y, s8min, s8max);
       const std::int32_t actual_div = div_sat(static_cast<std::int8_t>(x), static_cast<std::int8_t>(y));
