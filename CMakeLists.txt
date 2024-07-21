@@ -21,7 +21,7 @@ enable_testing()
 
 add_executable(
   test_komori_saturation_arithmetic
-  tests/test_main.cpp
+  tests/saturation_arithmetic_test.cpp
 )
 target_link_libraries(
   test_komori_saturation_arithmetic

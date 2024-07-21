@@ -1,13 +1,13 @@
 cc_library(
     name = "komori_saturation_arithmetic",
     hdrs = [
-        "komori/operations.hpp"
+        "komori/saturation_arithmetic.hpp"
     ],
 )
 
 cc_test(
     name = "test",
-    srcs = ["tests/test_main.cpp"],
+    srcs = ["tests/saturation_arithmetic_test.cpp"],
     deps = [
         ":komori_saturation_arithmetic",
         "@googletest//:gtest_main",
