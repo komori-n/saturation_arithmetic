@@ -10,9 +10,50 @@
 #define KOMORI_CONSTEXPR_IF_CPP17
 #endif
 
+#if defined(__has_builtin)
+#define KOMORI_HAS_BUILTIN(x) __has_builtin(x)
+#else
+#define KOMORI_HAS_BUILTIN(x) 0
+#endif
+
 namespace komori {
+namespace detail {
 template <typename T>
-constexpr T add_sat(T x, T y) noexcept;
+constexpr T add_sat_wo_builtin(T x, T y) noexcept {
+  constexpr T kMax = std::numeric_limits<T>::max();
+  constexpr T kMin = std::numeric_limits<T>::min();
+
+  if (y > 0 && x > kMax - y) {
+    return kMax;
+  } else if (y < 0 && x < kMin - y) {
+    return kMin;
+  } else {
+    return x + y;
+  }
+}
+}  // namespace detail
+
+/**
+ * @brief Adds two integers with saturation.
+ * @tparam T An integer type.
+ * @param x The first operand.
+ * @param y The second operand.
+ * @return The sum of the two operands with saturation.
+ */
+template <typename T>
+constexpr T add_sat(T x, T y) noexcept {
+  // Use the built-in function if available.
+#if KOMORI_HAS_BUILTIN(__builtin_add_overflow)
+  T result{};
+  if (__builtin_add_overflow(x, y, &result)) {
+    return y >= 0 ? std::numeric_limits<T>::max() : std::numeric_limits<T>::min();
+  }
+  return result;
+#else
+  return detail::add_sat_wo_builtin(x, y);
+#endif
+}
+
 template <typename T>
 constexpr T sub_sat(T x, T y) noexcept;
 template <typename T>
@@ -41,6 +82,7 @@ template <typename R, typename T>
 constexpr R saturate_cast(T x) noexcept;
 }  // namespace komori
 
+#undef KOMORI_HAS_BUILTIN
 #undef KOMORI_CONSTEXPR_IF_CPP17
 
 #endif  // KOMORI_OPERATIONS_HPP_

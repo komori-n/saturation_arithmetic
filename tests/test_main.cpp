@@ -4,7 +4,9 @@
 #include <cstdint>
 #include <limits>
 
+using komori::add_sat;
 using komori::div_sat;
+using komori::detail::add_sat_wo_builtin;
 
 namespace {
 template <typename T>
@@ -28,8 +30,34 @@ using integers = testing::Types<std::int8_t,
                                 std::uint64_t>;
 
 template <typename T>
+class AddSatTest : public testing::Test {};
+template <typename T>
 class DivSatTest : public testing::Test {};
 }  // namespace
+
+TYPED_TEST_SUITE(AddSatTest, integers);
+TYPED_TEST(AddSatTest, Test) {
+  constexpr TypeParam min = std::numeric_limits<TypeParam>::min();
+  constexpr TypeParam max = std::numeric_limits<TypeParam>::max();
+
+  EXPECT_EQ(TypeParam{33 + 4}, add_sat(TypeParam{33}, TypeParam{4}));
+  EXPECT_EQ(TypeParam{33 + 4}, add_sat_wo_builtin(TypeParam{33}, TypeParam{4}));
+  EXPECT_EQ(max, add_sat(max, TypeParam{1}));
+  EXPECT_EQ(max, add_sat_wo_builtin(max, TypeParam{1}));
+
+  if (std::is_signed<TypeParam>::value) {
+    EXPECT_EQ(TypeParam{33 + -4}, add_sat(TypeParam{33}, TypeParam{-4}));
+    EXPECT_EQ(TypeParam{33 + -4}, add_sat_wo_builtin(TypeParam{33}, TypeParam{-4}));
+    EXPECT_EQ(min, add_sat(min, TypeParam{-1}));
+    EXPECT_EQ(min, add_sat_wo_builtin(min, TypeParam{-1}));
+    EXPECT_EQ(min + 1, add_sat(min, TypeParam{1}));
+    EXPECT_EQ(min + 1, add_sat_wo_builtin(min, TypeParam{1}));
+    EXPECT_EQ(max, add_sat(max, TypeParam{1}));
+    EXPECT_EQ(max, add_sat_wo_builtin(max, TypeParam{1}));
+    EXPECT_EQ(max - 1, add_sat(max, TypeParam{-1}));
+    EXPECT_EQ(max - 1, add_sat_wo_builtin(max, TypeParam{-1}));
+  }
+}
 
 TYPED_TEST_SUITE(DivSatTest, integers);
 TYPED_TEST(DivSatTest, Test) {
@@ -57,10 +85,15 @@ TEST(S8Test, Int8All) {
         continue;
       }
 
-      const std::int32_t expected = clamp(x / y, s8min, s8max);
-      const std::int32_t actual = div_sat(static_cast<std::int8_t>(x), static_cast<std::int8_t>(y));
+      const std::int32_t expected_add = clamp(x + y, s8min, s8max);
+      const std::int32_t actual_add1 = add_sat(static_cast<std::int8_t>(x), static_cast<std::int8_t>(y));
+      const std::int32_t actual_add2 = add_sat_wo_builtin(static_cast<std::int8_t>(x), static_cast<std::int8_t>(y));
+      ASSERT_EQ(expected_add, actual_add1) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(expected_add, actual_add2) << "x: " << x << ", y: " << y;
 
-      ASSERT_EQ(expected, actual) << "x: " << x << ", y: " << y;
+      const std::int32_t expected_div = clamp(x / y, s8min, s8max);
+      const std::int32_t actual_div = div_sat(static_cast<std::int8_t>(x), static_cast<std::int8_t>(y));
+      ASSERT_EQ(expected_div, actual_div) << "x: " << x << ", y: " << y;
     }
   }
 }
