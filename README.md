@@ -1,5 +1,7 @@
 # saturation_arithmetic
 
+[![pre-commit](https://github.com/komori-n/saturation_arithmetic/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/komori-n/saturation_arithmetic/actions/workflows/pre-commit.yml) [![CMake on multiple platforms](https://github.com/komori-n/saturation_arithmetic/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/komori-n/saturation_arithmetic/actions/workflows/cmake-multi-platform.yml)
+
 A header-only library dedicated to Saturation Arithmetic in C++14.
 
 ## Getting Started
