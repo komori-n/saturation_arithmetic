@@ -28,7 +28,7 @@ target_link_libraries(
   GTest::gtest_main
 )
 if(MSVC)
-  target_compile_options(test_komori_saturation_arithmetic PRIVATE /wdC2397 /wdC4146)
+  target_compile_options(test_komori_saturation_arithmetic PRIVATE /w)
 else()
   target_compile_options(test_komori_saturation_arithmetic PRIVATE -Wall -Wextra -Wno-narrowing)
 endif()
