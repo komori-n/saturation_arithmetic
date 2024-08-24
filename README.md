@@ -56,8 +56,15 @@ int main() {
     assert(komori::div_sat(std::int8_t{33}, std::int8_t{4}) == 8);
     assert(komori::div_sat(std::int8_t{-128}, std::int8_t{-1}) == 127);
 
+    assert(komori::neg_sat(std::int8_t{33}) == -33);
+    assert(komori::neg_sat(std::int8_t{-128}) == 127);
+
     assert(komori::saturate_cast<std::int8_t>(33) == 33);
     assert(komori::saturate_cast<std::int8_t>(334) == 127);
+
+    komori::int_sat8_t a{33};
+    assert(a + komori::int_sat8_t{100} == 127);
+    assert(a * std::int8_t{-4} == -128);
 }
 ```
 

@@ -6,7 +6,10 @@
 
 using komori::add_sat;
 using komori::div_sat;
+using komori::int_sat64_t;
+using komori::int_sat8_t;
 using komori::mul_sat;
+using komori::neg_sat;
 using komori::saturate_cast;
 using komori::sub_sat;
 using komori::detail::add_sat_wo_builtin;
@@ -142,11 +145,11 @@ TEST(S8Test, Int8All) {
   const std::int32_t s8max = std::numeric_limits<std::int8_t>::max();
 
   for (std::int32_t x = s8min; x <= s8max; ++x) {
-    for (std::int32_t y = s8min; y <= s8max; ++y) {
-      if (y == 0) {
-        continue;
-      }
+    const std::int32_t expected_neg = clamp(-x, s8min, s8max);
+    const std::int32_t actual_neg1 = neg_sat(static_cast<std::int8_t>(x));
+    EXPECT_EQ(expected_neg, actual_neg1) << "x: " << x;
 
+    for (std::int32_t y = s8min; y <= s8max; ++y) {
       const std::int32_t expected_add = clamp(x + y, s8min, s8max);
       const std::int32_t actual_add1 = add_sat(static_cast<std::int8_t>(x), static_cast<std::int8_t>(y));
       const std::int32_t actual_add2 = add_sat_wo_builtin(static_cast<std::int8_t>(x), static_cast<std::int8_t>(y));
@@ -164,6 +167,10 @@ TEST(S8Test, Int8All) {
       const std::int32_t actual_mul2 = mul_sat_wo_builtin(static_cast<std::int8_t>(x), static_cast<std::int8_t>(y));
       ASSERT_EQ(expected_mul, actual_mul1) << "x: " << x << ", y: " << y;
       ASSERT_EQ(expected_mul, actual_mul2) << "x: " << x << ", y: " << y;
+
+      if (y == 0) {
+        continue;
+      }
 
       const std::int32_t expected_div = clamp(x / y, s8min, s8max);
       const std::int32_t actual_div = div_sat(static_cast<std::int8_t>(x), static_cast<std::int8_t>(y));
@@ -197,5 +204,169 @@ TEST(SaturateCast, Int16All) {
     ASSERT_EQ(type_clamp<std::int16_t>(x), saturate_cast<std::int16_t>(value)) << "x: " << x;
     ASSERT_EQ(type_clamp<std::uint8_t>(x), saturate_cast<std::uint8_t>(value)) << "x: " << x;
     ASSERT_EQ(type_clamp<std::int8_t>(x), saturate_cast<std::int8_t>(value)) << "x: " << x;
+  }
+}
+
+TEST(SatTypeTest, TypeConversion) {
+  const std::int8_t s8min = std::numeric_limits<std::int8_t>::min();
+  const std::int8_t s8max = std::numeric_limits<std::int8_t>::max();
+
+  for (std::int32_t x = s8min - 1; x <= s8max + 1; ++x) {
+    const int_sat8_t x_sat8{x};  // explicit constructor
+    const std::int8_t x_sat8_expected = saturate_cast<std::int8_t>(x);
+
+    EXPECT_EQ(x_sat8, x_sat8_expected) << "x: " << x;
+    EXPECT_EQ(x_sat8.value(), x_sat8_expected) << "x: " << x;
+
+    const int_sat64_t x_sat64 = x;  // non-explicit constructor
+    EXPECT_EQ(x_sat64, x) << "x: " << x;
+
+    int_sat64_t y_sat64;
+    y_sat64 = x;  // assignment operator
+    EXPECT_EQ(y_sat64, x) << "x: " << x;
+
+    EXPECT_EQ(static_cast<int_sat8_t>(x_sat64), x_sat8) << "x: " << x;
+    EXPECT_EQ(static_cast<std::int8_t>(x_sat64), x_sat8_expected) << "x: " << x;
+
+    EXPECT_EQ(static_cast<bool>(x_sat8), x_sat8 != 0) << "x: " << x;
+  }
+}
+
+TEST(SatTypeTest, Comparisons) {
+  const std::int8_t s8min = std::numeric_limits<std::int8_t>::min();
+  const std::int8_t s8max = std::numeric_limits<std::int8_t>::max();
+
+  for (std::int64_t x = s8min; x <= s8max; ++x) {
+    for (std::int64_t y = s8min; y <= s8max; ++y) {
+      const std::int8_t x_s8 = static_cast<std::int8_t>(x);
+      const std::int8_t y_s8 = static_cast<std::int8_t>(y);
+      const int_sat8_t x_sat8 = x_s8;
+      const int_sat8_t y_sat8 = y_s8;
+
+      const bool expected_lt = x_s8 < y_s8;
+      ASSERT_EQ(x_sat8 < y_sat8, expected_lt) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_sat8 < y_s8, expected_lt) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_s8 < y_sat8, expected_lt) << "x: " << x << ", y: " << y;
+
+      const bool expected_le = x_s8 <= y_s8;
+      ASSERT_EQ(x_sat8 <= y_sat8, expected_le) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_sat8 <= y_s8, expected_le) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_s8 <= y_sat8, expected_le) << "x: " << x << ", y: " << y;
+
+      const bool expected_gt = x_s8 > y_s8;
+      ASSERT_EQ(x_sat8 > y_sat8, expected_gt) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_sat8 > y_s8, expected_gt) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_s8 > y_sat8, expected_gt) << "x: " << x << ", y: " << y;
+
+      const bool expected_ge = x_s8 >= y_s8;
+      ASSERT_EQ(x_sat8 >= y_sat8, expected_ge) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_sat8 >= y_s8, expected_ge) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_s8 >= y_sat8, expected_ge) << "x: " << x << ", y: " << y;
+
+      const bool expected_eq = x_s8 == y_s8;
+      ASSERT_EQ(x_sat8 == y_sat8, expected_eq) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_sat8 == y_s8, expected_eq) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_s8 == y_sat8, expected_eq) << "x: " << x << ", y: " << y;
+
+      const bool expected_ne = x_s8 != y_s8;
+      ASSERT_EQ(x_sat8 != y_sat8, expected_ne) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_sat8 != y_s8, expected_ne) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_s8 != y_sat8, expected_ne) << "x: " << x << ", y: " << y;
+    }
+  }
+}
+
+TEST(SatTypeTest, Arithmetics) {
+  const std::int8_t s8min = std::numeric_limits<std::int8_t>::min();
+  const std::int8_t s8max = std::numeric_limits<std::int8_t>::max();
+
+  for (std::int64_t x = s8min; x <= s8max; ++x) {
+    for (std::int64_t y = s8min; y <= s8max; ++y) {
+      const std::int8_t x_s8 = static_cast<std::int8_t>(x);
+      const std::int8_t y_s8 = static_cast<std::int8_t>(y);
+      const int_sat8_t x_sat8 = x_s8;
+      const int_sat8_t y_sat8 = y_s8;
+      int_sat8_t tmp;
+
+      const int_sat8_t expected_neg = static_cast<std::int8_t>(clamp<std::int64_t>(-x, s8min, s8max));
+      ASSERT_EQ(-x_sat8, expected_neg) << "x: " << x;
+
+      const int_sat8_t expected_add = static_cast<std::int8_t>(clamp<std::int64_t>(x + y, s8min, s8max));
+      ASSERT_EQ(x_sat8 + y_sat8, expected_add) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_sat8 + y_s8, expected_add) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_s8 + y_sat8, expected_add) << "x: " << x << ", y: " << y;
+      tmp = x_sat8;
+      ASSERT_EQ(tmp += y_sat8, expected_add) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(tmp, expected_add) << "x: " << x << ", y: " << y;
+      tmp = x_sat8;
+      ASSERT_EQ(tmp += y_s8, expected_add) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(tmp, expected_add) << "x: " << x << ", y: " << y;
+
+      const int_sat8_t expected_sub = static_cast<std::int8_t>(clamp<std::int64_t>(x - y, s8min, s8max));
+      ASSERT_EQ(x_sat8 - y_sat8, expected_sub) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_sat8 - y_s8, expected_sub) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_s8 - y_sat8, expected_sub) << "x: " << x << ", y: " << y;
+      tmp = x_sat8;
+      ASSERT_EQ(tmp -= y_sat8, expected_sub) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(tmp, expected_sub) << "x: " << x << ", y: " << y;
+      tmp = x_sat8;
+      ASSERT_EQ(tmp -= y_s8, expected_sub) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(tmp, expected_sub) << "x: " << x << ", y: " << y;
+
+      const int_sat8_t expected_mul = static_cast<std::int8_t>(clamp<std::int64_t>(x * y, s8min, s8max));
+      ASSERT_EQ(x_sat8 * y_sat8, expected_mul) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_sat8 * y_s8, expected_mul) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_s8 * y_sat8, expected_mul) << "x: " << x << ", y: " << y;
+      tmp = x_sat8;
+      ASSERT_EQ(tmp *= y_sat8, expected_mul) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(tmp, expected_mul) << "x: " << x << ", y: " << y;
+      tmp = x_sat8;
+      ASSERT_EQ(tmp *= y_s8, expected_mul) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(tmp, expected_mul) << "x: " << x << ", y: " << y;
+
+      if (y == 0) {
+        continue;
+      }
+      const int_sat8_t expected_div = static_cast<std::int8_t>(clamp<std::int64_t>(x / y, s8min, s8max));
+      ASSERT_EQ(x_sat8 / y_sat8, expected_div) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_sat8 / y_s8, expected_div) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(x_s8 / y_sat8, expected_div) << "x: " << x << ", y: " << y;
+      tmp = x_sat8;
+      ASSERT_EQ(tmp /= y_sat8, expected_div) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(tmp, expected_div) << "x: " << x << ", y: " << y;
+      tmp = x_sat8;
+      ASSERT_EQ(tmp /= y_s8, expected_div) << "x: " << x << ", y: " << y;
+      ASSERT_EQ(tmp, expected_div) << "x: " << x << ", y: " << y;
+    }
+  }
+}
+
+TEST(SatTypeTest, OtherOperators) {
+  const std::int8_t s8min = std::numeric_limits<std::int8_t>::min();
+  const std::int8_t s8max = std::numeric_limits<std::int8_t>::max();
+
+  for (std::int64_t x = s8min; x <= s8max; ++x) {
+    const std::int8_t x_s8 = static_cast<std::int8_t>(x);
+    const int_sat8_t x_sat8 = x_s8;
+    int_sat8_t tmp;
+
+    const int_sat8_t expected_neg = static_cast<std::int8_t>(clamp<std::int64_t>(-x, s8min, s8max));
+    ASSERT_EQ(-x_sat8, expected_neg) << "x: " << x;
+
+    tmp = x_sat8;
+    ASSERT_EQ(tmp++, x_sat8) << "x: " << x;
+    ASSERT_EQ(tmp, x_sat8 + std::int8_t{1}) << "x: " << x;
+
+    tmp = x_sat8;
+    ASSERT_EQ(++tmp, x_sat8 + std::int8_t{1}) << "x: " << x;
+    ASSERT_EQ(tmp, x_sat8 + std::int8_t{1}) << "x: " << x;
+
+    tmp = x_sat8;
+    ASSERT_EQ(tmp--, x_sat8) << "x: " << x;
+    ASSERT_EQ(tmp, x_sat8 - std::int8_t{1}) << "x: " << x;
+
+    tmp = x_sat8;
+    ASSERT_EQ(--tmp, x_sat8 - std::int8_t{1}) << "x: " << x;
+    ASSERT_EQ(tmp, x_sat8 - std::int8_t{1}) << "x: " << x;
   }
 }
